@@ -1,0 +1,112 @@
+body {
+  margin: 0;
+}
+
+.d_none {
+  display: none;
+}
+
+.uppercase {
+  text-transform: capitalize;
+}
+
+.full-width {
+  width: 100%;
+}
+
+header {
+  height: 120px;
+  background-color: rgb(9, 32, 41);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+footer {
+  font-size: 20px;
+  height: 120px;
+  color: whitesmoke;
+  background-color: rgb(9, 32, 41);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#content {
+  background-color: rgb(6, 21, 27);
+  padding: 20px;
+  min-height: calc(100vh - 240px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.pkmCard {
+  height: 300px;
+  width: 200px;
+  color: whitesmoke;
+  background-color: rgb(9, 32, 41);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.pkmCardImg {
+  height: 200px;
+  filter: drop-shadow(2px 4px 6px black);
+}
+
+.pkmCard_upper_section {
+  display: flex;
+  height: 40px;
+  align-items: center;
+  padding: 8px;
+}
+
+.pkmCard_lower_section {
+  height: 60px;
+}
+
+.bg_grass {
+  background-color: green;
+}
+
+.bg_fire {
+  background-color: red;
+}
+
+.bg_water {
+  background-color: lightblue;
+}
+
+.bg_bug {
+  background-color: lightgreen;
+}
+
+.bg_normal {
+  background-color: grey;
+}
+
+#loading_spinner {
+  position: absolute;
+  top: 50vh;
+  left: 50vw;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px dotted #fff;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  animation: rotation 2s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

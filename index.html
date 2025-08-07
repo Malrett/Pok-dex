@@ -4,11 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokédex</title>
-    <script src="script.js"></script>
+
     <link rel="stylesheet" href="style.css" />
+    <link rel="shortcut icon" href="https://assets.pokemon.com/static2/_ui/img/favicon.ico" />
   </head>
   <body onload="init()">
-    <div id="poke_cards"></div>
-    <div id="overlay" class="overlay d_none"></div>
+    <header>
+      <img src="./assets/img/pokeapi_256.png" alt="" />
+    </header>
+    <main>
+      <div class="d_none" id="loading_spinner">
+        <span class="loader"></span>
+      </div>
+      <div id="content"></div>
+      <div id="overlay" class="overlay d_none"></div>
+    </main>
+    <footer>
+      <p>© 2025 Malte Rettberg</p>
+    </footer>
   </body>
+  <script src="script.js"></script>
 </html>
