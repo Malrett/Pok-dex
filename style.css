@@ -11,6 +11,20 @@ body {
     user-select: none; /* Standard syntax */
   }
 }
+button {
+  width: 160px;
+  cursor: pointer;
+  color: whitesmoke;
+  background-color: red;
+  padding: 12px;
+  margin: 20px;
+  border: none;
+  border-radius: 5px;
+}
+
+button:hover {
+  transform: scale(1.1);
+}
 
 .d_none {
   display: none !important;
@@ -27,6 +41,7 @@ body {
 .right {
   text-align: end;
 }
+
 header {
   height: 120px;
   background-color: rgb(9, 32, 41);
@@ -34,6 +49,7 @@ header {
   justify-content: center;
   align-items: center;
 }
+
 footer {
   font-size: 20px;
   height: 120px;
@@ -44,8 +60,15 @@ footer {
   align-items: center;
 }
 
-#content {
+main {
   background-color: rgb(6, 21, 27);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: 200ms;
+}
+
+#content {
   padding: 20px;
   min-height: calc(100vh - 240px);
   display: flex;

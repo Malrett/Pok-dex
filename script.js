@@ -1,51 +1,96 @@
 const BASE_URL = "https://pokeapi.co/api/v2";
 const loadingSpinnerRef = document.getElementById("loading_spinner");
+const loadingBtnRef = document.getElementById("loadingBtn");
 
+let apiOffset = 0;
 let allNames = [];
-
 let allPkmResource = [];
 
 function init() {
-  loadData("/pokemon?limit=20&offset=0");
+  loadData();
 }
 
 async function loadData(path = "") {
   showLoadingSpinner();
-  let initialData = await fetch(BASE_URL + path + ".json");
-  allNames = await initialData.json();
-  console.log(allNames.results);
-  loadDetails(allNames.results);
-  //renderPkmCards(allNames.results);
-}
+  try {
+    let response = await fetch(`${BASE_URL}/pokemon?limit=20&offset=${apiOffset}`);
+    if (!response.ok) throw new Error(`HTTP-Fehler: ${response.status}`);
 
-async function loadDetails(allNames) {
-  let pkmDetails = "";
-  for (let indexPkm = 0; indexPkm < allNames.length; indexPkm++) {
-    let response = await fetch(allNames[indexPkm].url);
-    pkmDetails = await response.json();
-    allPkmResource.push(pkmDetails);
+    let data = await response.json();
+
+    // Namen hinzufügen
+    allNames.push(...data.results);
+
+    // Details laden
+    await loadDetails(data.results);
+
+    // Nur neue Karten rendern
+    renderPkmCards(allPkmResource.length - data.results.length);
+  } catch (err) {
+    console.error("Fehler beim Laden der Pokémon-Liste:", err);
+    alert("Konnte Pokémon-Daten nicht laden. Bitte später erneut versuchen.");
+  } finally {
+    hideLoadingSpinner();
   }
-  console.log(allPkmResource);
-  hideLoadingSpinner();
-  renderPkmCards();
 }
 
-function renderPkmCards(allNames) {
+async function loadMoreData() {
+  apiOffset += 20;
+  await loadData();
+}
+
+async function loadDetails(pokemonList) {
+  try {
+    // Alle Requests gleichzeitig starten
+    const detailPromises = pokemonList.map(async (pkm) => {
+      let response = await fetch(pkm.url);
+      if (!response.ok) throw new Error(`HTTP-Fehler bei ${pkm.name}: ${response.status}`);
+      return response.json();
+    });
+
+    // Warten, bis alle fertig sind
+    const detailsArray = await Promise.all(detailPromises);
+
+    // Ergebnisse hinzufügen
+    allPkmResource.push(...detailsArray);
+  } catch (err) {
+    console.error("Fehler beim Laden der Pokémon-Details:", err);
+    alert("Einige Pokémon konnten nicht geladen werden.");
+  }
+}
+
+//async function loadDetails(pokemonList) {
+//  for (let pkm of pokemonList) {
+//    let response = await fetch(pkm.url);
+//    let details = await response.json();
+//    allPkmResource.push(details);
+//  }
+//
+//  console.log("Alle Details bisher:", allPkmResource);
+//  hideLoadingSpinner();
+//}
+
+//async function loadDetails(allNames) {
+//  let pkmDetails = "";
+//  for (let indexPkm = apiOffset; indexPkm < allNames.length; indexPkm++) {
+//    let response = await fetch(allNames[indexPkm].url);
+//    pkmDetails = await response.json();
+//    allPkmResource.push(pkmDetails);
+//  }
+//
+//  console.log(allPkmResource);
+//  hideLoadingSpinner();
+//  renderPkmCards();
+//}
+
+function renderPkmCards(startIndex) {
   let pkmCard = document.getElementById("content");
-  for (let indexPkm = 0; indexPkm < allPkmResource.length; indexPkm++) {
+  for (let indexPkm = startIndex; indexPkm < allPkmResource.length; indexPkm++) {
     pkmCard.innerHTML += `
      <div class="pkmCard" onclick="showOverlay(${indexPkm})" id="pkm_details${indexPkm}">
-      <div class="pkmCard_upper_section"><p class="left full-width"># ${
-        indexPkm + 1
-      }</p><p class="center full-width uppercase">${
-      allPkmResource[indexPkm].name
-    }</p><p class="full-width" ></p></div>
-      <div class="pkmCard_middle_section bg_${
-        allPkmResource[indexPkm].types[0].type.name
-      }">
-        <img class="pkmCardImg" src="${
-          allPkmResource[indexPkm].sprites.other["official-artwork"].front_shiny
-        }" alt="pokemon_img"></div>
+      <div class="pkmCard_upper_section"><p class="left full-width"># ${indexPkm + 1}</p><p class="center full-width uppercase">${allPkmResource[indexPkm].name}</p><p class="full-width" ></p></div>
+      <div class="pkmCard_middle_section bg_${allPkmResource[indexPkm].types[0].type.name}">
+        <img class="pkmCardImg" src="${allPkmResource[indexPkm].sprites.other["official-artwork"].front_shiny}" alt="pokemon_img"></div>
       <div class="pkmCard_lower_section">
       </div>
     </div>
@@ -66,26 +111,15 @@ function fillDialog(indexPkm) {
             <div class="dialogCard">
               <div class="pkmCard_upper_section">
                 <p class="left full-width"># ${indexPkm + 1}</p>
-                <p class="center full-width uppercase">${
-                  allPkmResource[indexPkm].name
-                }</p>
+                <p class="center full-width uppercase">${allPkmResource[indexPkm].name}</p>
                 <p onclick="hideOverlay()" class="full-width right highlight" >x</p>
               </div>
-              <div class="pkmCard_middle_section bg_${
-                allPkmResource[indexPkm].types[0].type.name
-              }">
-                <img class="pkmCardImg" src="${
-                  allPkmResource[indexPkm].sprites.other["official-artwork"]
-                    .front_shiny
-                }" alt="pokemon_img">
+              <div class="pkmCard_middle_section bg_${allPkmResource[indexPkm].types[0].type.name}">
+                <img class="pkmCardImg" src="${allPkmResource[indexPkm].sprites.other["official-artwork"].front_shiny}" alt="pokemon_img">
               </div>
               <div class="pkmCard_lower_section">
-                <span onclick="previousPkm(${
-                  indexPkm - 1
-                })" class="left_arrow highlight"><</span>
-                <span onclick="nextPkm(${
-                  indexPkm + 1
-                })" class="right_arrow highlight">></span>
+                <span onclick="previousPkm(${indexPkm - 1})" class="left_arrow highlight"><</span>
+                <span onclick="nextPkm(${indexPkm + 1})" class="right_arrow highlight">></span>
               </div>
             </div>
           </div>`;
@@ -111,8 +145,15 @@ function previousPkm(i) {
 
 function showLoadingSpinner() {
   loadingSpinnerRef.classList.remove("d_none");
+  loadingBtnRef.classList.add("d_none");
 }
 
 function hideLoadingSpinner() {
   loadingSpinnerRef.classList.add("d_none");
+  loadingBtnRef.classList.remove("d_none");
 }
+
+//function loadMorePkm() {
+//  apiOffset += 20;
+//  loadData("/pokemon?limit=20&offset=");
+//}
