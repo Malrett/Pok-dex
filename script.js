@@ -13,7 +13,9 @@ function init() {
 async function loadData(path = "") {
   showLoadingSpinner();
   try {
-    let response = await fetch(`${BASE_URL}/pokemon?limit=20&offset=${apiOffset}`);
+    let response = await fetch(
+      `${BASE_URL}/pokemon?limit=20&offset=${apiOffset}`
+    );
     if (!response.ok) throw new Error(`HTTP-Fehler: ${response.status}`);
 
     let data = await response.json();
@@ -44,7 +46,8 @@ async function loadDetails(pokemonList) {
     // Alle Requests gleichzeitig starten
     const detailPromises = pokemonList.map(async (pkm) => {
       let response = await fetch(pkm.url);
-      if (!response.ok) throw new Error(`HTTP-Fehler bei ${pkm.name}: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP-Fehler bei ${pkm.name}: ${response.status}`);
       return response.json();
     });
 
@@ -83,15 +86,46 @@ async function loadDetails(pokemonList) {
 //  renderPkmCards();
 //}
 
+// Holt die Typen-Icons als HTML-String
+function getTypeIcons(pokemon) {
+  if (!pokemon.types || pokemon.types.length === 0) {
+    return "";
+  }
+  return pokemon.types
+    .map((t) => {
+      const typeName = t.type.name;
+      return `
+      <div class="icon ${typeName}">
+      <img 
+      src="./assets/svg/${typeName}.svg" 
+      alt="${typeName} icon" 
+      class="type_icon"
+    /></div>`;
+    })
+    .join("");
+}
+
 function renderPkmCards(startIndex) {
   let pkmCard = document.getElementById("content");
-  for (let indexPkm = startIndex; indexPkm < allPkmResource.length; indexPkm++) {
+  for (
+    let indexPkm = startIndex;
+    indexPkm < allPkmResource.length;
+    indexPkm++
+  ) {
+    const pokemon = allPkmResource[indexPkm];
     pkmCard.innerHTML += `
-     <div class="pkmCard" onclick="showOverlay(${indexPkm})" id="pkm_details${indexPkm}">
-      <div class="pkmCard_upper_section"><p class="left full-width"># ${indexPkm + 1}</p><p class="center full-width uppercase">${allPkmResource[indexPkm].name}</p><p class="full-width" ></p></div>
-      <div class="pkmCard_middle_section bg_${allPkmResource[indexPkm].types[0].type.name}">
-        <img class="pkmCardImg" src="${allPkmResource[indexPkm].sprites.other["official-artwork"].front_shiny}" alt="pokemon_img"></div>
+    <div class="pkmCard scale_effect" onclick="showOverlay(${indexPkm})" id="pkm_details${indexPkm}">
+      <div class="pkmCard_upper_section"><p class="left full-width"># ${
+        indexPkm + 1
+      }</p><p class="center full-width uppercase">${
+      pokemon.name
+    }</p><p class="full-width" ></p></div>
+      <div class="pkmCard_middle_section ${pokemon.types[0].type.name}">
+        <img class="pkmCardImg" src="${
+          pokemon.sprites.other["official-artwork"].front_shiny
+        }" alt="pokemon_img"></div>
       <div class="pkmCard_lower_section">
+        ${getTypeIcons(pokemon)}
       </div>
     </div>
     
@@ -104,29 +138,48 @@ function showOverlay(indexPkm) {
   dialogContent.innerHTML = "";
   document.getElementById("overlay").classList.remove("d_none");
   dialogContent.innerHTML += fillDialog(indexPkm);
+  document.body.classList.add("hide");
 }
 
 function fillDialog(indexPkm) {
   return `<div onclick="event.stopPropagation()" id="dialog" class="dialog prevent-select">
-            <div class="dialogCard">
-              <div class="pkmCard_upper_section">
-                <p class="left full-width"># ${indexPkm + 1}</p>
-                <p class="center full-width uppercase">${allPkmResource[indexPkm].name}</p>
-                <p onclick="hideOverlay()" class="full-width right highlight" >x</p>
+            <div class="dialogCard_upper_section half-height">
+              <div
+                class="pkmCard dialog_width" id="pkm_details${indexPkm}">
+                <div class="pkmCard_upper_section">
+                  <p class="left full-width"># ${indexPkm + 1}</p>
+                  <p class="center full-width uppercase">
+                    ${allPkmResource[indexPkm].name}
+                  </p>
+                  <span onclick="hideOverlay()" class="close_img highlight full-width right" >x</span>
+                </div>
+                <div
+                  class="pkmCard_middle_section ${
+                    allPkmResource[indexPkm].types[0].type.name
+                  }">
+                  <img class="pkmCardImg" src="${
+                    allPkmResource[indexPkm].sprites.other["official-artwork"]
+                      .front_shiny
+                  }" alt="pokemon_img">
+                </div>
+                <div class="pkmCard_lower_section">
+                ${getTypeIcons(allPkmResource[indexPkm])}</div>
               </div>
-              <div class="pkmCard_middle_section bg_${allPkmResource[indexPkm].types[0].type.name}">
-                <img class="pkmCardImg" src="${allPkmResource[indexPkm].sprites.other["official-artwork"].front_shiny}" alt="pokemon_img">
-              </div>
-              <div class="pkmCard_lower_section">
-                <span onclick="previousPkm(${indexPkm - 1})" class="left_arrow highlight"><</span>
-                <span onclick="nextPkm(${indexPkm + 1})" class="right_arrow highlight">></span>
-              </div>
+            </div>
+            <div class="dialogCard_lower_section half-height">        
+                <span onclick="previousPkm(${
+                  indexPkm - 1
+                })" class="left_arrow highlight"><</span>
+                <span onclick="nextPkm(${
+                  indexPkm + 1
+                })" class="right_arrow highlight">></span>
             </div>
           </div>`;
 }
 
 function hideOverlay() {
   document.getElementById("overlay").classList.add("d_none");
+  document.body.classList.remove("hide");
 }
 
 function nextPkm(i) {

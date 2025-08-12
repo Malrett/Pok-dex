@@ -1,16 +1,21 @@
 body {
   margin: 0;
-
-  html {
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  }
-
-  .prevent-select {
-    -webkit-user-select: none; /* Safari */
-    -ms-user-select: none; /* IE 10 and IE 11 */
-    user-select: none; /* Standard syntax */
-  }
 }
+
+body.hide {
+  overflow: hidden;
+}
+
+html {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
 button {
   width: 160px;
   cursor: pointer;
@@ -36,6 +41,14 @@ button:hover {
 
 .full-width {
   width: 100%;
+}
+
+.half-height {
+  height: 50%;
+}
+
+.center {
+  text-align: center;
 }
 
 .right {
@@ -77,8 +90,6 @@ main {
 }
 
 .pkmCard {
-  height: 300px;
-  width: 200px;
   color: whitesmoke;
   background-color: rgb(9, 32, 41);
   border-radius: 10px;
@@ -86,7 +97,7 @@ main {
   transition: 200ms;
 }
 
-.pkmCard:hover {
+.scale_effect:hover {
   transform: scale(1.1);
 }
 
@@ -102,28 +113,17 @@ main {
   padding: 8px;
 }
 
+.pkmCard_middle_section {
+  display: flex;
+  justify-content: center;
+}
+
 .pkmCard_lower_section {
-  height: 60px;
-}
-
-.bg_grass {
-  background-color: green;
-}
-
-.bg_fire {
-  background-color: red;
-}
-
-.bg_water {
-  background-color: lightblue;
-}
-
-.bg_bug {
-  background-color: lightgreen;
-}
-
-.bg_normal {
-  background-color: grey;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
 }
 
 #loading_spinner {
@@ -158,15 +158,16 @@ main {
   justify-content: center;
   height: 100vh;
   width: 100%;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.9);
 }
 
 .dialog {
-  position: relative;
+  position: fixed;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 600px;
@@ -175,6 +176,13 @@ main {
   color: whitesmoke;
   border-radius: 20px;
   cursor: pointer;
+}
+
+.dialog_width {
+  width: 400px;
+}
+
+.dialog_card_upper_section {
 }
 
 .highlight:hover {
