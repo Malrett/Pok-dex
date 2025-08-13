@@ -6,6 +6,8 @@ let apiOffset = 0;
 let allNames = [];
 let allPkmResource = [];
 
+let activeCategoryId = "pkm_info_container"; // Standard ist "Main"
+
 function init() {
   loadData();
 }
@@ -115,6 +117,32 @@ function getTypeAbilities(pokemon) {
   return `<p>${abilitiesText}</p>`;
 }
 
+function getStatsBars(pokemon) {
+  const maxStatValue = 255;
+  let html = `<table class="statsTable">`;
+
+  pokemon.stats.forEach((statObj) => {
+    const value = statObj.base_stat;
+    const name = statObj.stat.name;
+    const percentage = Math.max(1, (value / maxStatValue) * 100); // mind. 1%
+
+    html += `
+      <tr>
+        <td text-transform:capitalize;">${name}</td>
+        <td>
+          <div class="statBarOuter">
+            <div class="statBarInner" style="width:${percentage}%;"></div>
+          </div>
+        </td>
+        <td style="padding-left:8px;">${value}</td>
+      </tr>
+    `;
+  });
+
+  html += `</table>`;
+  return html;
+}
+
 function renderPkmCards(startIndex) {
   let pkmCard = document.getElementById("content");
   for (
@@ -188,59 +216,68 @@ function fillDialog(indexPkm) {
             </div>
             <div class="dialogCard_lower_section half-height"> 
               <section class="category_selection">
-                <button class="active" onclick="showCategory('pkm_info_container', 'pkm_stats_container', 'pkm_evochain_container', this)">Main</button>
-                <button onclick="showCategory('pkm_stats_container', 'pkm_info_container', 'pkm_evochain_container', this)">Stats</button>
-                <button onclick="showCategory('pkm_evochain_container', 'pkm_info_container', 'pkm_stats_container', this)">Evo chain</button>
+                <button class="${
+                  activeCategoryId === "pkm_info_container" ? "active" : ""
+                }" 
+                        onclick="showCategory('pkm_info_container', 'pkm_stats_container', 'pkm_evochain_container', this)">Main</button>
+                <button class="${
+                  activeCategoryId === "pkm_stats_container" ? "active" : ""
+                }" 
+                        onclick="showCategory('pkm_stats_container', 'pkm_info_container', 'pkm_evochain_container', this)">Stats</button>
+                <button class="${
+                  activeCategoryId === "pkm_evochain_container" ? "active" : ""
+                }" 
+                        onclick="showCategory('pkm_evochain_container', 'pkm_info_container', 'pkm_stats_container', this)">Evo chain</button>
               </section>       
               
-                
-              <div id="pkm_info_container">
+              <div id="pkm_info_container" class="${
+                activeCategoryId === "pkm_info_container" ? "" : "d_none"
+              }">
                   <table>
-                    <tr>
-                      <td><p><b>Height:</b></p></td>
-                      <td><p>${allPkmResource[indexPkm].height}</p></td>
-                    </tr>
-                    <tr>
-                      <td><p><b>Weight:</b></p></td>
-                      <td><p>${allPkmResource[indexPkm].weight}</p></td>
-                    </tr>
-                    <tr>
-                      <td><p><b>Base Experience:</b></p></td>
-                      <td><p>${
-                        allPkmResource[indexPkm].base_experience
-                      }</p></td>
-                    </tr>  
-                    <tr>
-                      <td><p><b>Abilities:</b></p></td>
-                      <td><p>${getTypeAbilities(
-                        allPkmResource[indexPkm]
-                      )}</p></td>
-                    </tr>  
+                    <tr><td><p><b>Height:</b></p></td><td><p>${
+                      allPkmResource[indexPkm].height
+                    }</p></td></tr>
+                    <tr><td><p><b>Weight:</b></p></td><td><p>${
+                      allPkmResource[indexPkm].weight
+                    }</p></td></tr>
+                    <tr><td><p><b>Base Experience:</b></p></td><td><p>${
+                      allPkmResource[indexPkm].base_experience
+                    }</p></td></tr>  
+                    <tr><td><p><b>Abilities:</b></p></td><td><p>${getTypeAbilities(
+                      allPkmResource[indexPkm]
+                    )}</p></td></tr>  
                   </table>
               </div>
-              <div id="pkm_stats_container" class="d_none"></div>
-              <div id="pkm_evochain_container" class="d_none"></div>
+              <div id="pkm_stats_container" class="${
+                activeCategoryId === "pkm_stats_container" ? "" : "d_none"
+              }">
+                ${getStatsBars(allPkmResource[indexPkm])}
+              </div>
+              <div id="pkm_evochain_container" class="${
+                activeCategoryId === "pkm_evochain_container" ? "" : "d_none"
+              }"></div>
             </div>  
           </div>`;
 }
 
 function showCategory(showContainer1, hideContainer2, hideContainer3, btn) {
+  activeCategoryId = showContainer1; // merken, welcher Container aktiv ist
+
   document.getElementById(showContainer1).classList.remove("d_none");
   document.getElementById(hideContainer2).classList.add("d_none");
   document.getElementById(hideContainer3).classList.add("d_none");
 
-  // Alle Buttons zurücksetzen
   document
     .querySelectorAll(".category_selection button")
     .forEach((b) => b.classList.remove("active"));
 
-  // Geklickten Button aktiv setzen
   btn.classList.add("active");
 }
 
 function hideOverlay() {
   document.getElementById("overlay").classList.add("d_none");
   document.body.classList.remove("hide");
+  activeCategoryId = "pkm_info_container"; // zurück auf Main
 }
 
 function nextPkm(i) {

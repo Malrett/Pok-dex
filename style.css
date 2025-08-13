@@ -89,6 +89,7 @@ main {
   padding: 20px;
   min-height: calc(100vh - 240px);
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 20px;
 }
@@ -131,9 +132,10 @@ main {
 }
 
 #loading_spinner {
-  position: absolute;
-  top: 50vh;
-  left: 50vw;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 100;
 }
 
 .loader {
@@ -224,6 +226,29 @@ main {
 
 .category_selection button.active {
   border-bottom: 1px solid white;
+}
+
+.statsTable {
+  border-collapse: collapse;
+  height: 240px;
+  margin-left: 20px;
+}
+
+.statsTable td:first-child {
+  width: 120px;
+}
+
+.statBarOuter {
+  width: 160px;
+  height: 12px;
+  background-color: #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.statBarInner {
+  height: 100%;
+  background-color: red;
 }
 
 .highlight:hover {
