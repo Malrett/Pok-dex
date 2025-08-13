@@ -16,7 +16,7 @@ html {
   user-select: none; /* Standard syntax */
 }
 
-button {
+.loadPkmBtn {
   width: 160px;
   cursor: pointer;
   color: whitesmoke;
@@ -27,7 +27,7 @@ button {
   border-radius: 5px;
 }
 
-button:hover {
+.loadPkmBtn:hover {
   transform: scale(1.1);
 }
 
@@ -47,6 +47,10 @@ button:hover {
   height: 50%;
 }
 
+.left {
+  text-align: left;
+}
+
 .center {
   text-align: center;
 }
@@ -57,7 +61,7 @@ button:hover {
 
 header {
   height: 120px;
-  background-color: rgb(9, 32, 41);
+  background-color: rgb(8, 33, 41);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -67,14 +71,14 @@ footer {
   font-size: 20px;
   height: 120px;
   color: whitesmoke;
-  background-color: rgb(9, 32, 41);
+  background-color: rgb(8, 33, 41);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 main {
-  background-color: rgb(6, 21, 27);
+  background-color: rgb(6, 21, 29);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -91,7 +95,7 @@ main {
 
 .pkmCard {
   color: whitesmoke;
-  background-color: rgb(9, 32, 41);
+  background-color: rgb(8, 33, 41);
   border-radius: 10px;
   cursor: pointer;
   transition: 200ms;
@@ -172,7 +176,7 @@ main {
   justify-content: center;
   height: 600px;
   width: 400px;
-  background-color: rgb(9, 32, 41);
+  background-color: rgb(8, 33, 41);
   color: whitesmoke;
   border-radius: 20px;
   cursor: pointer;
@@ -182,7 +186,44 @@ main {
   width: 400px;
 }
 
+.dialog_version {
+  justify-content: space-between;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.icons {
+  display: flex;
+  gap: 12px;
+}
+
 .dialog_card_upper_section {
+}
+
+.dialogCard_lower_section {
+  background-color: rgb(13, 50, 64);
+  width: 100%;
+  border-radius: 0 0px 20px 20px;
+}
+
+.category_selection {
+  background-color: rgb(13, 50, 64);
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+}
+
+.category_selection button {
+  background-color: rgb(18, 71, 88);
+  width: 33.33%;
+  border: 1px solid transparent;
+  color: white;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.category_selection button.active {
+  border-bottom: 1px solid white;
 }
 
 .highlight:hover {

@@ -105,6 +105,16 @@ function getTypeIcons(pokemon) {
     .join("");
 }
 
+function getTypeAbilities(pokemon) {
+  if (!pokemon.abilities || pokemon.abilities.length === 0) {
+    return "";
+  }
+
+  const abilitiesText = pokemon.abilities.map((a) => a.ability.name).join(", ");
+
+  return `<p>${abilitiesText}</p>`;
+}
+
 function renderPkmCards(startIndex) {
   let pkmCard = document.getElementById("content");
   for (
@@ -142,7 +152,7 @@ function showOverlay(indexPkm) {
 }
 
 function fillDialog(indexPkm) {
-  return `<div onclick="event.stopPropagation()" id="dialog" class="dialog prevent-select">
+  return `<div  id="dialog" class="dialog prevent-select">
             <div class="dialogCard_upper_section half-height">
               <div
                 class="pkmCard dialog_width" id="pkm_details${indexPkm}">
@@ -162,19 +172,70 @@ function fillDialog(indexPkm) {
                       .front_shiny
                   }" alt="pokemon_img">
                 </div>
-                <div class="pkmCard_lower_section">
-                ${getTypeIcons(allPkmResource[indexPkm])}</div>
+                <div class="pkmCard_lower_section dialog_version">
+                  <span onclick="previousPkm(${
+                    indexPkm - 1
+                  })" class="left_arrow highlight"><</span>
+                  <div class="icons">
+                    ${getTypeIcons(allPkmResource[indexPkm])}
+                  </div>
+                  <span onclick="nextPkm(${
+                    indexPkm + 1
+                  })" class="right_arrow highlight">>
+                  </span>
+                </div>
               </div>
             </div>
-            <div class="dialogCard_lower_section half-height">        
-                <span onclick="previousPkm(${
-                  indexPkm - 1
-                })" class="left_arrow highlight"><</span>
-                <span onclick="nextPkm(${
-                  indexPkm + 1
-                })" class="right_arrow highlight">></span>
-            </div>
+            <div class="dialogCard_lower_section half-height"> 
+              <section class="category_selection">
+                <button class="active" onclick="showCategory('pkm_info_container', 'pkm_stats_container', 'pkm_evochain_container', this)">Main</button>
+                <button onclick="showCategory('pkm_stats_container', 'pkm_info_container', 'pkm_evochain_container', this)">Stats</button>
+                <button onclick="showCategory('pkm_evochain_container', 'pkm_info_container', 'pkm_stats_container', this)">Evo chain</button>
+              </section>       
+              
+                
+              <div id="pkm_info_container">
+                  <table>
+                    <tr>
+                      <td><p><b>Height:</b></p></td>
+                      <td><p>${allPkmResource[indexPkm].height}</p></td>
+                    </tr>
+                    <tr>
+                      <td><p><b>Weight:</b></p></td>
+                      <td><p>${allPkmResource[indexPkm].weight}</p></td>
+                    </tr>
+                    <tr>
+                      <td><p><b>Base Experience:</b></p></td>
+                      <td><p>${
+                        allPkmResource[indexPkm].base_experience
+                      }</p></td>
+                    </tr>  
+                    <tr>
+                      <td><p><b>Abilities:</b></p></td>
+                      <td><p>${getTypeAbilities(
+                        allPkmResource[indexPkm]
+                      )}</p></td>
+                    </tr>  
+                  </table>
+              </div>
+              <div id="pkm_stats_container" class="d_none"></div>
+              <div id="pkm_evochain_container" class="d_none"></div>
+            </div>  
           </div>`;
+}
+
+function showCategory(showContainer1, hideContainer2, hideContainer3, btn) {
+  document.getElementById(showContainer1).classList.remove("d_none");
+  document.getElementById(hideContainer2).classList.add("d_none");
+  document.getElementById(hideContainer3).classList.add("d_none");
+
+  // Alle Buttons zurücksetzen
+  document
+    .querySelectorAll(".category_selection button")
+    .forEach((b) => b.classList.remove("active"));
+
+  // Geklickten Button aktiv setzen
+  btn.classList.add("active");
 }
 
 function hideOverlay() {
