@@ -14,7 +14,14 @@
   </head>
   <body onload="init()">
     <header>
+      <div class="header-left"></div>
       <img src="./assets/img/pokeapi_256.png" alt="" />
+      <input
+        type="text"
+        id="pokemonSearch"
+        placeholder="Pokémon suchen..."
+        autocomplete="off"
+      />
     </header>
     <main>
       <div class="d_none" id="loading_spinner">
@@ -35,4 +42,5 @@
     </footer>
   </body>
   <script src="script.js"></script>
+  <script src="/scripts/templates.js"></script>
 </html>

@@ -5,106 +5,131 @@ const loadingBtnRef = document.getElementById("loadingBtn");
 let apiOffset = 0;
 let allNames = [];
 let allPkmResource = [];
-
+let evoChainCache = {};
+let pkmDataCache = {};
 let activeCategoryId = "pkm_info_container"; // Standard ist "Main"
+let currentSearchQuery = "";
 
 function init() {
   loadData();
+  initPokemonSearch();
 }
 
 async function loadData(path = "") {
   showLoadingSpinner();
   try {
-    let response = await fetch(
-      `${BASE_URL}/pokemon?limit=20&offset=${apiOffset}`
-    );
-    if (!response.ok) throw new Error(`HTTP-Fehler: ${response.status}`);
-
-    let data = await response.json();
-
-    // Namen hinzufügen
-    allNames.push(...data.results);
-
-    // Details laden
-    await loadDetails(data.results);
-
-    // Nur neue Karten rendern
-    renderPkmCards(allPkmResource.length - data.results.length);
+    const data = await fetchPokemonList();
+    const startIndex = allPkmResource.length; // Startindex merken (vor dem Einfügen)
+    allNames.push(...data.results); // Namen in Order
+    await loadDetails(data.results); // Details laden (geordnet einfügen)
+    renderPkmCards(startIndex); // Nur neue Karten rendern
   } catch (err) {
-    console.error("Fehler beim Laden der Pokémon-Liste:", err);
-    alert("Konnte Pokémon-Daten nicht laden. Bitte später erneut versuchen.");
+    handleLoadError(err);
   } finally {
     hideLoadingSpinner();
   }
 }
 
+async function fetchPokemonList() {
+  const response = await fetch(
+    `${BASE_URL}/pokemon?limit=20&offset=${apiOffset}`
+  );
+  if (!response.ok) throw new Error(`HTTP-Fehler: ${response.status}`);
+  return response.json();
+}
+
+function handleLoadError(err) {
+  console.error("Fehler beim Laden der Pokémon-Liste:", err);
+  alert("Konnte Pokémon-Daten nicht laden. Bitte später erneut versuchen.");
+}
+
 async function loadMoreData() {
   apiOffset += 20;
   await loadData();
+  applySearchFilter(); // Filter bleibt aktiv
+}
+
+async function preloadEvolutionChain(pokemon) {
+  if (evoChainCache[pokemon.name]) return;
+  try {
+    const evoNames = await getEvolutionNames(pokemon);
+    await preloadEvolutionImages(evoNames);
+    await cacheEvolutionHTML(pokemon.name, evoNames);
+  } catch (err) {
+    logEvolutionWarning(pokemon.name, err);
+  }
+}
+
+async function getEvolutionNames(pokemon) {
+  //kümmert sich um das Abrufen und Parsen der Evolutionsnamen
+  const speciesData = await fetchSpeciesData(pokemon);
+  const evoChainData = await fetchEvolutionChain(speciesData);
+  return parseEvolutionNames(evoChainData.chain);
+}
+
+async function preloadEvolutionImages(evoNames) {
+  //lädt alle Bilder vor und cached sie im Browser
+  await Promise.all(
+    evoNames.map(async (name) => {
+      const pkmData = await fetchPokemonDataByName(name);
+      const imageUrl = pkmData.sprites.other["official-artwork"].front_default;
+      const img = new Image();
+      img.src = imageUrl;
+    })
+  );
+}
+
+async function cacheEvolutionHTML(pokemonName, evoNames) {
+  //baut das HTML und speichert es im Cache
+  const evoHTML = await buildEvolutionHTML(evoNames);
+  evoChainCache[pokemonName] = evoHTML;
+}
+
+function logEvolutionWarning(pokemonName, err) {
+  //einheitliche Fehlerausgabe
+  console.warn(`Evo-Chain konnte nicht vorgeladen werden: ${pokemonName}`, err);
 }
 
 async function loadDetails(pokemonList) {
   try {
-    // Alle Requests gleichzeitig starten
-    const detailPromises = pokemonList.map(async (pkm) => {
-      let response = await fetch(pkm.url);
-      if (!response.ok)
-        throw new Error(`HTTP-Fehler bei ${pkm.name}: ${response.status}`);
-      return response.json();
-    });
-
-    // Warten, bis alle fertig sind
-    const detailsArray = await Promise.all(detailPromises);
-
-    // Ergebnisse hinzufügen
-    allPkmResource.push(...detailsArray);
+    const detailsArray = await fetchAllPokemonDetails(pokemonList);
+    storePokemonDetails(detailsArray);
   } catch (err) {
-    console.error("Fehler beim Laden der Pokémon-Details:", err);
-    alert("Einige Pokémon konnten nicht geladen werden.");
+    handleDetailsLoadError(err);
   }
 }
 
-//async function loadDetails(pokemonList) {
-//  for (let pkm of pokemonList) {
-//    let response = await fetch(pkm.url);
-//    let details = await response.json();
-//    allPkmResource.push(details);
-//  }
-//
-//  console.log("Alle Details bisher:", allPkmResource);
-//  hideLoadingSpinner();
-//}
+async function fetchAllPokemonDetails(pokemonList) {
+  const detailPromises = pokemonList.map((pkm) =>
+    fetch(pkm.url).then((res) => {
+      if (!res.ok)
+        throw new Error(`HTTP-Fehler bei ${pkm.name}: ${res.status}`);
+      return res.json();
+    })
+  );
+  return Promise.all(detailPromises);
+}
 
-//async function loadDetails(allNames) {
-//  let pkmDetails = "";
-//  for (let indexPkm = apiOffset; indexPkm < allNames.length; indexPkm++) {
-//    let response = await fetch(allNames[indexPkm].url);
-//    pkmDetails = await response.json();
-//    allPkmResource.push(pkmDetails);
-//  }
-//
-//  console.log(allPkmResource);
-//  hideLoadingSpinner();
-//  renderPkmCards();
-//}
+function storePokemonDetails(detailsArray) {
+  const base = allPkmResource.length;
+  detailsArray.forEach((d, i) => {
+    allPkmResource[base + i] = d; // Reihenfolge stabil
+    pkmDataCache[d.name] = d; // optional: in den Cache
+    preloadEvolutionChain(d); // async, blockiert nicht
+  });
+}
+
+function handleDetailsLoadError(err) {
+  console.error("Fehler beim Laden der Pokémon-Details:", err);
+  alert("Einige Pokémon konnten nicht geladen werden.");
+}
 
 // Holt die Typen-Icons als HTML-String
 function getTypeIcons(pokemon) {
   if (!pokemon.types || pokemon.types.length === 0) {
     return "";
   }
-  return pokemon.types
-    .map((t) => {
-      const typeName = t.type.name;
-      return `
-      <div class="icon ${typeName}">
-      <img 
-      src="./assets/svg/${typeName}.svg" 
-      alt="${typeName} icon" 
-      class="type_icon"
-    /></div>`;
-    })
-    .join("");
+  return pokemon.types.map((t) => getTypeIconsTemplate(t.type.name)).join("");
 }
 
 function getTypeAbilities(pokemon) {
@@ -114,11 +139,15 @@ function getTypeAbilities(pokemon) {
 
   const abilitiesText = pokemon.abilities.map((a) => a.ability.name).join(", ");
 
-  return `<p>${abilitiesText}</p>`;
+  return getTypeAbilitiesTemplate(abilitiesText);
 }
 
 function getStatsBars(pokemon) {
   const maxStatValue = 255;
+  if (!pokemon.stats || pokemon.stats.length === 0) {
+    return "";
+  }
+
   let html = `<table class="statsTable">`;
 
   pokemon.stats.forEach((statObj) => {
@@ -126,17 +155,7 @@ function getStatsBars(pokemon) {
     const name = statObj.stat.name;
     const percentage = Math.max(1, (value / maxStatValue) * 100); // mind. 1%
 
-    html += `
-      <tr>
-        <td text-transform:capitalize;">${name}</td>
-        <td>
-          <div class="statBarOuter">
-            <div class="statBarInner" style="width:${percentage}%;"></div>
-          </div>
-        </td>
-        <td style="padding-left:8px;">${value}</td>
-      </tr>
-    `;
+    html += getStatRowTemplate(name, percentage, value);
   });
 
   html += `</table>`;
@@ -145,29 +164,14 @@ function getStatsBars(pokemon) {
 
 function renderPkmCards(startIndex) {
   let pkmCard = document.getElementById("content");
+
   for (
     let indexPkm = startIndex;
     indexPkm < allPkmResource.length;
     indexPkm++
   ) {
     const pokemon = allPkmResource[indexPkm];
-    pkmCard.innerHTML += `
-    <div class="pkmCard scale_effect" onclick="showOverlay(${indexPkm})" id="pkm_details${indexPkm}">
-      <div class="pkmCard_upper_section"><p class="left full-width"># ${
-        indexPkm + 1
-      }</p><p class="center full-width uppercase">${
-      pokemon.name
-    }</p><p class="full-width" ></p></div>
-      <div class="pkmCard_middle_section ${pokemon.types[0].type.name}">
-        <img class="pkmCardImg" src="${
-          pokemon.sprites.other["official-artwork"].front_shiny
-        }" alt="pokemon_img"></div>
-      <div class="pkmCard_lower_section">
-        ${getTypeIcons(pokemon)}
-      </div>
-    </div>
-    
-    `;
+    pkmCard.innerHTML += renderPkmCardsTemplate(pokemon, indexPkm);
   }
 }
 
@@ -175,103 +179,161 @@ function showOverlay(indexPkm) {
   let dialogContent = document.getElementById("overlay");
   dialogContent.innerHTML = "";
   document.getElementById("overlay").classList.remove("d_none");
-  dialogContent.innerHTML += fillDialog(indexPkm);
+  dialogContent.innerHTML += fillDialogTemplate(indexPkm);
   document.body.classList.add("hide");
+
+  // Falls Evo-Tab aktiv war, direkt Evolution Chain laden
+  if (activeCategoryId === "pkm_evochain_container") {
+    loadEvolutionChain(indexPkm);
+  }
 }
 
-function fillDialog(indexPkm) {
-  return `<div  id="dialog" class="dialog prevent-select">
-            <div class="dialogCard_upper_section half-height">
-              <div
-                class="pkmCard dialog_width" id="pkm_details${indexPkm}">
-                <div class="pkmCard_upper_section">
-                  <p class="left full-width"># ${indexPkm + 1}</p>
-                  <p class="center full-width uppercase">
-                    ${allPkmResource[indexPkm].name}
-                  </p>
-                  <span onclick="hideOverlay()" class="close_img highlight full-width right" >x</span>
-                </div>
-                <div
-                  class="pkmCard_middle_section ${
-                    allPkmResource[indexPkm].types[0].type.name
-                  }">
-                  <img class="pkmCardImg" src="${
-                    allPkmResource[indexPkm].sprites.other["official-artwork"]
-                      .front_shiny
-                  }" alt="pokemon_img">
-                </div>
-                <div class="pkmCard_lower_section dialog_version">
-                  <span onclick="previousPkm(${
-                    indexPkm - 1
-                  })" class="left_arrow highlight"><</span>
-                  <div class="icons">
-                    ${getTypeIcons(allPkmResource[indexPkm])}
-                  </div>
-                  <span onclick="nextPkm(${
-                    indexPkm + 1
-                  })" class="right_arrow highlight">>
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="dialogCard_lower_section half-height"> 
-              <section class="category_selection">
-                <button class="${
-                  activeCategoryId === "pkm_info_container" ? "active" : ""
-                }" 
-                        onclick="showCategory('pkm_info_container', 'pkm_stats_container', 'pkm_evochain_container', this)">Main</button>
-                <button class="${
-                  activeCategoryId === "pkm_stats_container" ? "active" : ""
-                }" 
-                        onclick="showCategory('pkm_stats_container', 'pkm_info_container', 'pkm_evochain_container', this)">Stats</button>
-                <button class="${
-                  activeCategoryId === "pkm_evochain_container" ? "active" : ""
-                }" 
-                        onclick="showCategory('pkm_evochain_container', 'pkm_info_container', 'pkm_stats_container', this)">Evo chain</button>
-              </section>       
-              
-              <div id="pkm_info_container" class="${
-                activeCategoryId === "pkm_info_container" ? "" : "d_none"
-              }">
-                  <table>
-                    <tr><td><p><b>Height:</b></p></td><td><p>${
-                      allPkmResource[indexPkm].height
-                    }</p></td></tr>
-                    <tr><td><p><b>Weight:</b></p></td><td><p>${
-                      allPkmResource[indexPkm].weight
-                    }</p></td></tr>
-                    <tr><td><p><b>Base Experience:</b></p></td><td><p>${
-                      allPkmResource[indexPkm].base_experience
-                    }</p></td></tr>  
-                    <tr><td><p><b>Abilities:</b></p></td><td><p>${getTypeAbilities(
-                      allPkmResource[indexPkm]
-                    )}</p></td></tr>  
-                  </table>
-              </div>
-              <div id="pkm_stats_container" class="${
-                activeCategoryId === "pkm_stats_container" ? "" : "d_none"
-              }">
-                ${getStatsBars(allPkmResource[indexPkm])}
-              </div>
-              <div id="pkm_evochain_container" class="${
-                activeCategoryId === "pkm_evochain_container" ? "" : "d_none"
-              }"></div>
-            </div>  
-          </div>`;
+async function fetchSpeciesData(pokemon) {
+  const speciesRes = await fetch(pokemon.species.url);
+  if (!speciesRes.ok) throw new Error("Fehler beim Laden der Species-Daten");
+  return speciesRes.json();
+}
+
+async function fetchEvolutionChain(speciesData) {
+  const evoChainRes = await fetch(speciesData.evolution_chain.url);
+  if (!evoChainRes.ok) throw new Error("Fehler beim Laden der Evolution Chain");
+  return evoChainRes.json();
+}
+
+function parseEvolutionNames(chain) {
+  const evoNames = [];
+  function traverse(chainPart) {
+    evoNames.push(chainPart.species.name);
+    if (chainPart.evolves_to.length > 0) {
+      chainPart.evolves_to.forEach((next) => traverse(next));
+    }
+  }
+  traverse(chain);
+  return evoNames;
+}
+
+async function fetchPokemonDataByName(name) {
+  const cached = getPokemonFromCache(name) || getPokemonFromResource(name);
+  if (cached) return cached;
+
+  const pkmData = await fetchPokemonFromAPI(name);
+  pkmDataCache[name] = pkmData;
+  return pkmData;
+}
+
+function getPokemonFromCache(name) {
+  return pkmDataCache[name] || null;
+}
+
+function getPokemonFromResource(name) {
+  const found = allPkmResource.find((p) => p.name === name);
+  if (found) {
+    pkmDataCache[name] = found;
+    return found;
+  }
+  return null;
+}
+
+async function fetchPokemonFromAPI(name) {
+  const res = await fetch(`${BASE_URL}/pokemon/${name}`);
+  if (!res.ok) throw new Error(`Fehler beim Laden von ${name}`);
+  return res.json();
+}
+
+async function buildEvolutionHTML(evoNames) {
+  const evoHTMLParts = [];
+  for (let i = 0; i < evoNames.length; i++) {
+    const name = evoNames[i];
+    const pkmData = await fetchPokemonDataByName(name);
+    const imageUrl = pkmData.sprites.other["official-artwork"].front_default;
+    evoHTMLParts.push(getEvolutionStageTemplate(name, imageUrl));
+
+    if (i < evoNames.length - 1) {
+      evoHTMLParts.push(getEvolutionArrowTemplate());
+    }
+  }
+  return evoHTMLParts.join("");
+}
+
+async function loadEvolutionChain(pokemonIndex) {
+  //ist jetzt ein reiner Ablaufplan (Lesbarkeit + Wartbarkeit)
+  const pokemon = allPkmResource[pokemonIndex];
+  if (showEvolutionFromCache(pokemon)) return;
+
+  try {
+    await preloadEvolutionChain(pokemon);
+    displayEvolutionHTML(pokemon.name);
+  } catch (err) {
+    handleEvolutionChainError(err);
+  }
+}
+
+function showEvolutionFromCache(pokemon) {
+  //kümmert sich nur um den Cache-Check und die Anzeige
+  if (evoChainCache[pokemon.name]) {
+    document.getElementById("pkm_evochain_container").innerHTML =
+      evoChainCache[pokemon.name];
+    return true;
+  }
+  return false;
+}
+
+function displayEvolutionHTML(pokemonName) {
+  //setzt das HTML im DOM
+  document.getElementById("pkm_evochain_container").innerHTML =
+    evoChainCache[pokemonName] || "<p>Keine Evolutionsdaten verfügbar.</p>";
+}
+
+function handleEvolutionChainError(err) {
+  //Fehlerbehandlung und die Fallback-Anzeige
+  console.error("Fehler beim Laden der Evolutionskette:", err);
+  document.getElementById("pkm_evochain_container").innerHTML =
+    "<p>Keine Evolutionsdaten verfügbar.</p>";
 }
 
 function showCategory(showContainer1, hideContainer2, hideContainer3, btn) {
-  activeCategoryId = showContainer1; // merken, welcher Container aktiv ist
+  //ist jetzt nur noch ein Ablaufplan, leicht lesbar
+  activeCategoryId = showContainer1;
+  toggleContainers(showContainer1, hideContainer2, hideContainer3);
+  updateActiveCategoryButton(btn);
+  maybeLoadEvolutionChain(showContainer1);
+}
 
-  document.getElementById(showContainer1).classList.remove("d_none");
-  document.getElementById(hideContainer2).classList.add("d_none");
-  document.getElementById(hideContainer3).classList.add("d_none");
+function toggleContainers(showId, hideId1, hideId2) {
+  // kümmert sich rein um Sichtbarkeit der Container
+  document.getElementById(showId).classList.remove("d_none");
+  document.getElementById(hideId1).classList.add("d_none");
+  document.getElementById(hideId2).classList.add("d_none");
+}
 
+function updateActiveCategoryButton(btn) {
   document
     .querySelectorAll(".category_selection button")
     .forEach((b) => b.classList.remove("active"));
-
   btn.classList.add("active");
+}
+
+function maybeLoadEvolutionChain(showId) {
+  //lädt Evolutionsdaten nur bei Bedarf
+  if (showId !== "pkm_evochain_container") return;
+  if (document.getElementById(showId).hasChildNodes()) return;
+
+  const currentIndex = getCurrentOverlayPokemonIndex();
+  if (currentIndex !== null) {
+    loadEvolutionChain(currentIndex);
+  }
+}
+
+// Hilfsfunktion: Pokémon-Index aus aktuellem Overlay ermitteln
+function getCurrentOverlayPokemonIndex() {
+  const overlay = document.getElementById("overlay");
+  if (!overlay) return null;
+  const pkmCard = overlay.querySelector(".pkmCard");
+  if (!pkmCard || !pkmCard.id) return null;
+
+  // ID hat Form "pkm_detailsX" → Index extrahieren
+  const match = pkmCard.id.match(/pkm_details(\d+)/);
+  return match ? parseInt(match[1], 10) : null;
 }
 
 function hideOverlay() {
@@ -308,3 +370,53 @@ function hideLoadingSpinner() {
 //  apiOffset += 20;
 //  loadData("/pokemon?limit=20&offset=");
 //}
+
+//≥ 3 Buchstaben → Filter aktiv, sucht gleichzeitig in: pokemon.name, pokemon.types[*].type.name (z. B. "fire", "water")
+// Nach „Load More“ wird sofort mit dem aktuellen Suchtext erneut gefiltert.
+// Wenn Eingabe kürzer als 3 Zeichen → alle Pokémon anzeigen
+function initPokemonSearch() {
+  const searchInput = document.getElementById("pokemonSearch");
+  if (!searchInput) return;
+  searchInput.addEventListener("input", handleSearchInput);
+}
+
+//nur für Eingabe-Event zuständig
+function handleSearchInput(e) {
+  currentSearchQuery = e.target.value.trim().toLowerCase();
+  applySearchFilter();
+}
+
+//steuert Ablauf zwischen Vollanzeige & Filter
+function applySearchFilter() {
+  const pkmCard = document.getElementById("content");
+  if (currentSearchQuery.length < 3) {
+    renderPokemonList(allPkmResource);
+    return;
+  }
+  const filtered = filterPokemon(currentSearchQuery);
+  renderPokemonList(filtered, true);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+//filtert nach Namen oder Typ
+function filterPokemon(query) {
+  return allPkmResource.filter((pkm) => {
+    const matchesName = pkm.name.toLowerCase().includes(query);
+    const matchesType = pkm.types?.some((t) =>
+      t.type.name.toLowerCase().includes(query)
+    );
+    return matchesName || matchesType;
+  });
+}
+
+//kümmert sich ums Rendern, optional mit Original-Index
+function renderPokemonList(list, keepIndex = false) {
+  const pkmCard = document.getElementById("content");
+  pkmCard.innerHTML = "";
+  list.forEach((pokemon, index) => {
+    const realIndex = keepIndex
+      ? allPkmResource.findIndex((p) => p.name === pokemon.name)
+      : index;
+    pkmCard.innerHTML += renderPkmCardsTemplate(pokemon, realIndex);
+  });
+}
