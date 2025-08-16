@@ -30,7 +30,7 @@ function getStatRowTemplate(name, percentage, value) {
 
 function renderPkmCardsTemplate(pokemon, indexPkm) {
   return `
-    <div class="pkmCard scale_effect" onclick="showOverlay(${indexPkm})" id="pkm_details${indexPkm}">
+    <div class="pkmCard clickable scale_effect" onclick="showOverlay(${indexPkm})" id="pkm_details${indexPkm}">
       <div class="pkmCard_upper_section">
         <p class="left full-width"># ${indexPkm + 1}</p>
         <p class="center full-width uppercase">${pokemon.name}</p>
@@ -60,7 +60,7 @@ function fillDialogTemplate(indexPkm) {
                   <p class="center full-width uppercase">
                     ${allPkmResource[indexPkm].name}
                   </p>
-                  <span onclick="hideOverlay()" class="close_img highlight full-width right" >x</span>
+                  <span onclick="hideOverlay()" class="close_img clickable highlight full-width right" >x</span>
                 </div>
                 <div
                   class="pkmCard_middle_section ${
@@ -74,13 +74,13 @@ function fillDialogTemplate(indexPkm) {
                 <div class="pkmCard_lower_section dialog_version">
                   <span onclick="previousPkm(${
                     indexPkm - 1
-                  })" class="left_arrow highlight"><</span>
+                  })" class="left_arrow clickable highlight"><</span>
                   <div class="icons">
                     ${getTypeIcons(allPkmResource[indexPkm])}
                   </div>
                   <span onclick="nextPkm(${
                     indexPkm + 1
-                  })" class="right_arrow highlight">>
+                  })" class="right_arrow clickable highlight">>
                   </span>
                 </div>
               </div>
@@ -104,7 +104,7 @@ function fillDialogTemplate(indexPkm) {
               <div id="pkm_info_container" class="${
                 activeCategoryId === "pkm_info_container" ? "" : "d_none"
               }">
-                  <table>
+                  <table class="infoTable">
                     <tr><td><p><b>Height:</b></p></td><td><p>${
                       allPkmResource[indexPkm].height
                     }</p></td></tr>

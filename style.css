@@ -1,6 +1,8 @@
 body {
   margin: 0;
   margin-top: 120px; /* Gleiche Höhe wie Header */
+  font-family: raleway;
+  font-variant-numeric: lining-nums;
   color: whitesmoke;
 }
 
@@ -10,6 +12,10 @@ body.hide {
 
 html {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.clickable {
+  cursor: pointer;
 }
 
 p {
@@ -69,26 +75,40 @@ header {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100vw;
   height: 120px;
   background-color: rgb(8, 33, 41);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-right: 12px;
   z-index: 99;
 }
 
-.header-left {
-  width: 200px; /* gleiche Breite wie Input, damit Logo mittig bleibt */
+.header_wrapper {
+  max-width: 1400px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: auto;
+  padding: 0 16px;
 }
 
-header img {
-  flex: 0 0 auto;
+.header-left {
+  width: 200px;
+}
+
+.header-right {
+  width: 200px;
+  margin-right: 32px;
 }
 
 header input {
-  margin-right: 12px;
+  width: 196px;
+  height: 32px;
+  padding-left: 8px;
+  border: none;
+}
+
+header input:focus {
+  outline: none;
 }
 
 footer {
@@ -103,9 +123,14 @@ footer {
 
 main {
   background-color: rgb(6, 21, 29);
+}
+
+.main_wrapper {
+  max-width: 1400px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: auto;
   transition: 200ms;
 }
 
@@ -123,7 +148,6 @@ main {
   color: whitesmoke;
   background-color: rgb(8, 33, 41);
   border-radius: 10px;
-  cursor: pointer;
   transition: 200ms;
 }
 
@@ -207,7 +231,6 @@ main {
   background-color: rgb(8, 33, 41);
   color: whitesmoke;
   border-radius: 20px;
-  cursor: pointer;
 }
 
 .dialog_width {
@@ -251,6 +274,17 @@ main {
   border-bottom: 1px solid white;
 }
 
+.infoTable {
+  height: 160px;
+  border-collapse: collapse;
+  margin-top: 12px;
+  margin-left: 20px;
+}
+
+.infoTable td:first-child {
+  width: 120px;
+}
+
 .statsTable {
   border-collapse: collapse;
   height: 240px;
@@ -288,4 +322,93 @@ main {
 
 .evoStage img {
   width: 80px;
+}
+
+.dropdown-results {
+  position: absolute;
+  width: 100%; /* gleiche Breite wie Input */
+  top: 100%; /* direkt darunter */
+  left: 0;
+  background: white;
+  color: rgb(94 109 113);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 999;
+  border: 1px solid #ddd;
+  border-top: none; /* bündig mit Input */
+  box-sizing: border-box;
+}
+
+.dropdown-results div {
+  padding: 8px;
+  cursor: pointer;
+}
+.dropdown-results div:hover {
+  background: #f0f0f0;
+}
+
+/* Sucheingabe mit Clear-Button & Dropdown */
+.search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.search-wrapper input {
+  width: 100%;
+  height: 32px;
+  padding-left: 8px;
+  border: 1px solid #ddd; /* gleiche Border wie Dropdown */
+  box-sizing: border-box; /* Padding zählt in die Gesamtbreite */
+}
+
+.search-wrapper input:focus {
+  outline: none;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 14px;
+  color: #888;
+}
+.clear-btn:hover {
+  color: #000;
+}
+
+/* Responsive Anpassung */
+@media (max-width: 530px) {
+  header {
+    height: 140px;
+  }
+
+  .header_wrapper {
+    flex-direction: column; /* Logo oben, Suche unten */
+    height: auto;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .header-left {
+    margin-left: 0;
+  }
+
+  .header-left img {
+    height: 70px;
+  }
+
+  .header-right {
+    width: 200px; /* Input volle Breite */
+    margin-right: 0;
+  }
+
+  .search-wrapper {
+    width: 100%;
+  }
+
+  .dropdown-results {
+    width: 100%;
+  }
 }

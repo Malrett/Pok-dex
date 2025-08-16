@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokédex</title>
-
+    <link rel="stylesheet" href="./styles/fonts.css" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="icons.css" />
     <link
@@ -14,28 +14,41 @@
   </head>
   <body onload="init()">
     <header>
-      <div class="header-left"></div>
-      <img src="./assets/img/pokeapi_256.png" alt="" />
-      <input
-        type="text"
-        id="pokemonSearch"
-        placeholder="Pokémon suchen..."
-        autocomplete="off"
-      />
+      <div class="header_wrapper">
+        <div class="header-left">
+          <img src="./assets/img/pokeapi_256.png" alt="Pokémon Logo" />
+        </div>
+        <div class="header-right">
+          <div class="search-wrapper">
+            <input
+              type="text"
+              id="pokemonSearch"
+              placeholder="Pokémon suchen..."
+              autocomplete="off"
+            />
+            <span id="clearSearch" class="clear-btn" style="display: none"
+              >✖</span
+            >
+            <div id="searchDropdown" class="dropdown-results"></div>
+          </div>
+        </div>
+      </div>
     </header>
     <main>
-      <div class="d_none" id="loading_spinner">
-        <span class="loader"></span>
+      <div class="main_wrapper">
+        <div class="d_none" id="loading_spinner">
+          <span class="loader"></span>
+        </div>
+        <div id="content"></div>
+        <button
+          onclick="loadMoreData()"
+          id="loadingBtn"
+          class="loadPkmBtn d_none"
+        >
+          Load more Pokémons
+        </button>
+        <div id="overlay" class="overlay d_none"></div>
       </div>
-      <div id="content"></div>
-      <button
-        onclick="loadMoreData()"
-        id="loadingBtn"
-        class="loadPkmBtn d_none"
-      >
-        Load more Pokémons
-      </button>
-      <div id="overlay" class="overlay d_none"></div>
     </main>
     <footer>
       <p>© 2025 Malte Rettberg</p>

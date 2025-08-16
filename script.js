@@ -375,48 +375,81 @@ function hideLoadingSpinner() {
 // Nach „Load More“ wird sofort mit dem aktuellen Suchtext erneut gefiltert.
 // Wenn Eingabe kürzer als 3 Zeichen → alle Pokémon anzeigen
 function initPokemonSearch() {
-  const searchInput = document.getElementById("pokemonSearch");
-  if (!searchInput) return;
-  searchInput.addEventListener("input", handleSearchInput);
+  const inp = document.getElementById("pokemonSearch");
+  const clear = document.getElementById("clearSearch");
+  if (!inp) return;
+  inp.addEventListener("input", handleSearchInput);
+  clear.addEventListener("click", () => {
+    inp.value = "";
+    currentSearchQuery = "";
+    applySearchFilter();
+  });
 }
 
 //nur für Eingabe-Event zuständig
 function handleSearchInput(e) {
   currentSearchQuery = e.target.value.trim().toLowerCase();
+  document.getElementById("clearSearch").style.display = currentSearchQuery
+    ? "block"
+    : "none";
   applySearchFilter();
 }
 
 //steuert Ablauf zwischen Vollanzeige & Filter
 function applySearchFilter() {
-  const pkmCard = document.getElementById("content");
-  if (currentSearchQuery.length < 3) {
-    renderPokemonList(allPkmResource);
-    return;
-  }
-  const filtered = filterPokemon(currentSearchQuery);
-  renderPokemonList(filtered, true);
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  const results = currentSearchQuery
+    ? filterPokemon(currentSearchQuery)
+    : allPkmResource;
+  renderPokemonList(results, !!currentSearchQuery);
+  showDropdownResults(results);
+  toggleLoadMoreButton();
 }
 
 //filtert nach Namen oder Typ
-function filterPokemon(query) {
-  return allPkmResource.filter((pkm) => {
-    const matchesName = pkm.name.toLowerCase().includes(query);
-    const matchesType = pkm.types?.some((t) =>
-      t.type.name.toLowerCase().includes(query)
-    );
-    return matchesName || matchesType;
-  });
+function filterPokemon(q) {
+  return allPkmResource.filter(
+    (p) =>
+      p.name.toLowerCase().includes(q) ||
+      p.types?.some((t) => t.type.name.toLowerCase().includes(q))
+  );
 }
 
 //kümmert sich ums Rendern, optional mit Original-Index
 function renderPokemonList(list, keepIndex = false) {
-  const pkmCard = document.getElementById("content");
-  pkmCard.innerHTML = "";
-  list.forEach((pokemon, index) => {
-    const realIndex = keepIndex
-      ? allPkmResource.findIndex((p) => p.name === pokemon.name)
-      : index;
-    pkmCard.innerHTML += renderPkmCardsTemplate(pokemon, realIndex);
+  const c = document.getElementById("content");
+  c.innerHTML = "";
+  list.forEach((p, i) => {
+    const idx = keepIndex
+      ? allPkmResource.findIndex((ap) => ap.name === p.name)
+      : i;
+    c.innerHTML += renderPkmCardsTemplate(p, idx);
   });
+}
+
+function showDropdownResults(results) {
+  const dd = document.getElementById("searchDropdown");
+  const inp = document.getElementById("pokemonSearch");
+  dd.innerHTML = "";
+  if (!currentSearchQuery) return (dd.style.display = "none");
+
+  results.slice(0, 10).forEach((p) => {
+    const div = document.createElement("div");
+    div.textContent = p.name;
+    div.onclick = () => {
+      inp.value = p.name;
+      currentSearchQuery = p.name.toLowerCase();
+      dd.style.display = "none";
+      renderPokemonList([p], true);
+      toggleLoadMoreButton();
+    };
+    dd.appendChild(div);
+  });
+
+  dd.style.display = results.length ? "block" : "none";
+}
+
+function toggleLoadMoreButton() {
+  document
+    .getElementById("loadingBtn")
+    .classList.toggle("d_none", !!currentSearchQuery);
 }
