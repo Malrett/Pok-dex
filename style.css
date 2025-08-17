@@ -1,7 +1,7 @@
 body {
   margin: 0;
   margin-top: 120px; /* Gleiche Höhe wie Header */
-  font-family: raleway;
+  font-family: raleway, sans-serif;
   font-variant-numeric: lining-nums;
   color: whitesmoke;
 }
@@ -18,8 +18,21 @@ html {
   cursor: pointer;
 }
 
+button {
+  font-size: 16px;
+}
+
+a {
+  color: whitesmoke;
+  text-decoration: none;
+}
+
 p {
   margin: 0;
+}
+
+h2 {
+  font-size: 18px;
 }
 
 .prevent-select {
@@ -29,8 +42,7 @@ p {
 }
 
 .loadPkmBtn {
-  width: 160px;
-  cursor: pointer;
+  width: 188px;
   color: whitesmoke;
   background-color: red;
   padding: 12px;
@@ -71,6 +83,10 @@ p {
   text-align: end;
 }
 
+.arrow {
+  font-size: 18px;
+}
+
 header {
   position: fixed;
   top: 0;
@@ -107,19 +123,63 @@ header img {
   margin-right: 32px;
 }
 
-header input {
-  width: 196px;
-  height: 32px;
-  padding-left: 8px;
-  border: none;
+/* Sucheingabe mit Clear-Button & Dropdown */
+.search-wrapper {
+  position: relative;
+  width: 100%;
 }
 
-header input:focus {
+.search-wrapper input {
+  font-family: raleway, sans-serif;
+  width: 100%;
+  height: 32px;
+  padding-left: 8px;
+  border: 1px solid #ddd; /* gleiche Border wie Dropdown */
+  box-sizing: border-box; /* Padding zählt in die Gesamtbreite */
+}
+
+.search-wrapper input:focus {
   outline: none;
 }
 
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 14px;
+  color: #888;
+}
+.clear-btn:hover {
+  color: #000;
+}
+
+.dropdown-results {
+  position: absolute;
+  width: 100%; /* gleiche Breite wie Input */
+  top: 100%; /* direkt darunter */
+  left: 0;
+  background: white;
+  color: rgb(94 109 113);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 120;
+  border: 1px solid #ddd;
+  border-top: none; /* bündig mit Input */
+  box-sizing: border-box;
+}
+
+.dropdown-results div {
+  padding: 8px;
+  cursor: pointer;
+}
+.dropdown-results div:hover {
+  background: #f0f0f0;
+}
+
 footer {
-  font-size: 20px;
+  font-size: 18px;
   height: 120px;
   color: whitesmoke;
   background-color: rgb(8, 33, 41);
@@ -169,8 +229,9 @@ main {
 }
 
 .pkmCard_upper_section {
+  font-size: 18px;
   display: flex;
-  height: 40px;
+  height: 34px;
   align-items: center;
   padding: 8px;
 }
@@ -181,7 +242,8 @@ main {
 }
 
 .pkmCard_lower_section {
-  height: 40px;
+  height: 34px;
+  padding: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -262,6 +324,7 @@ main {
 }
 
 .category_selection {
+  height: 34px;
   background-color: rgb(13, 50, 64);
   display: flex;
   justify-content: space-between;
@@ -281,25 +344,33 @@ main {
   border-bottom: 1px solid white;
 }
 
-.infoTable {
-  height: 160px;
-  border-collapse: collapse;
-  margin-top: 12px;
-  margin-left: 20px;
+#pkm_info_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.infoTable td:first-child {
+#pkm_stats_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.table {
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.table td:first-child {
   width: 140px;
+}
+
+.infoTable {
+  height: 160px;
 }
 
 .statsTable {
-  border-collapse: collapse;
   height: 240px;
-  margin-left: 20px;
-}
-
-.statsTable td:first-child {
-  width: 140px;
 }
 
 .statBarOuter {
@@ -320,102 +391,43 @@ main {
 }
 
 #pkm_evochain_container {
+  height: 266px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
-  margin-top: 65px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .evoStage img {
   width: 80px;
 }
 
-.dropdown-results {
-  position: absolute;
-  width: 100%; /* gleiche Breite wie Input */
-  top: 100%; /* direkt darunter */
-  left: 0;
-  background: white;
-  color: rgb(94 109 113);
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 120;
-  border: 1px solid #ddd;
-  border-top: none; /* bündig mit Input */
-  box-sizing: border-box;
-}
-
-.dropdown-results div {
-  padding: 8px;
-  cursor: pointer;
-}
-.dropdown-results div:hover {
-  background: #f0f0f0;
-}
-
-/* Sucheingabe mit Clear-Button & Dropdown */
-.search-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-.search-wrapper input {
-  width: 100%;
-  height: 32px;
-  padding-left: 8px;
-  border: 1px solid #ddd; /* gleiche Border wie Dropdown */
-  box-sizing: border-box; /* Padding zählt in die Gesamtbreite */
-}
-
-.search-wrapper input:focus {
-  outline: none;
-}
-
-.clear-btn {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 14px;
-  color: #888;
-}
-.clear-btn:hover {
-  color: #000;
-}
-
 #legal_overlay_container {
-  display: flex;
-  justify-content: center;
   flex-direction: column;
-  align-items: center;
-  position: fixed;
-  height: 100vh;
-  width: 100%;
-  z-index: 999;
-  top: 0;
-  left: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-}
-
-#legal_overlay_container img {
-  height: 24px;
-  width: 24px;
-  cursor: pointer;
 }
 
 .legalNotice,
 .privacy_policy {
-  background-color: rgb(13, 50, 64);
+  background-color: rgb(8, 33, 41);
   margin: 12px 12px 64px 12px;
   padding: 12px;
   height: 800px;
   max-width: 600px;
+}
+
+.privacy_policy {
   overflow-y: scroll;
 }
 
 /* Responsive Anpassung */
+
+@media (max-width: 600px) {
+  footer {
+    font-size: 16px;
+  }
+}
+
 @media (max-width: 530px) {
   body {
     margin-top: 140px;
@@ -428,8 +440,8 @@ main {
   .header_wrapper {
     flex-direction: column; /* Logo oben, Suche unten */
     height: auto;
-    padding: 12px;
-    gap: 12px;
+    padding: 8px;
+    gap: 8px;
   }
 
   .header-left {
@@ -452,6 +464,10 @@ main {
   .dropdown-results {
     width: 100%;
   }
+
+  footer {
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 440px) {
@@ -468,9 +484,22 @@ main {
     width: 100%;
   }
 
+  #pkm_info_container,
+  #pkm_stats_container {
+    font-size: 12px;
+  }
+
+  .statsTable {
+    margin: 0;
+  }
+
   .infoTable td:first-child,
   .statsTable td:first-child {
     width: 100px; /* schmaler */
+  }
+
+  .statBarOuter {
+    width: 130px;
   }
 
   .evoStage img {

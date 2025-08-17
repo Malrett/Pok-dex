@@ -51,7 +51,7 @@ function renderPkmCardsTemplate(pokemon, indexPkm) {
 }
 
 function fillDialogTemplate(indexPkm) {
-  return `<div  id="dialog" class="dialog prevent-select">
+  return `<div onclick="event.stopPropagation()" id="dialog" class="dialog prevent-select">
             <div class="dialogCard_upper_section half-height">
               <div
                 class="pkmCard dialog_width" id="pkm_details${indexPkm}">
@@ -63,70 +63,41 @@ function fillDialogTemplate(indexPkm) {
                   <span onclick="hideOverlay()" class="close_img clickable highlight full-width right" >x</span>
                 </div>
                 <div
-                  class="pkmCard_middle_section ${
-                    allPkmResource[indexPkm].types[0].type.name
-                  }">
-                  <img class="pkmCardImg" src="${
-                    allPkmResource[indexPkm].sprites.other["official-artwork"]
-                      .front_shiny
-                  }" alt="pokemon_img">
+                  class="pkmCard_middle_section ${allPkmResource[indexPkm].types[0].type.name}">
+                  <img class="pkmCardImg" src="${allPkmResource[indexPkm].sprites.other["official-artwork"].front_shiny}" alt="pokemon_img">
                 </div>
                 <div class="pkmCard_lower_section dialog_version">
-                  <span onclick="previousPkm(${
-                    indexPkm - 1
-                  })" class="left_arrow clickable highlight"><</span>
+                  <span onclick="previousPkm(${indexPkm - 1})" class="arrow clickable highlight"><</span>
                   <div class="icons">
                     ${getTypeIcons(allPkmResource[indexPkm])}
                   </div>
-                  <span onclick="nextPkm(${
-                    indexPkm + 1
-                  })" class="right_arrow clickable highlight">>
+                  <span onclick="nextPkm(${indexPkm + 1})" class="arrow clickable highlight">>
                   </span>
                 </div>
               </div>
             </div>
             <div class="dialogCard_lower_section half-height"> 
               <section class="category_selection">
-                <button class="${
-                  activeCategoryId === "pkm_info_container" ? "active" : ""
-                }" 
+                <button class="${activeCategoryId === "pkm_info_container" ? "active" : ""}" 
                         onclick="showCategory('pkm_info_container', 'pkm_stats_container', 'pkm_evochain_container', this)">Main</button>
-                <button class="${
-                  activeCategoryId === "pkm_stats_container" ? "active" : ""
-                }" 
+                <button class="${activeCategoryId === "pkm_stats_container" ? "active" : ""}" 
                         onclick="showCategory('pkm_stats_container', 'pkm_info_container', 'pkm_evochain_container', this)">Stats</button>
-                <button class="${
-                  activeCategoryId === "pkm_evochain_container" ? "active" : ""
-                }" 
+                <button class="${activeCategoryId === "pkm_evochain_container" ? "active" : ""}" 
                         onclick="showCategory('pkm_evochain_container', 'pkm_info_container', 'pkm_stats_container', this)">Evo chain</button>
               </section>       
               
-              <div id="pkm_info_container" class="${
-                activeCategoryId === "pkm_info_container" ? "" : "d_none"
-              }">
-                  <table class="infoTable">
-                    <tr><td><p><b>Height:</b></p></td><td><p>${
-                      allPkmResource[indexPkm].height
-                    }</p></td></tr>
-                    <tr><td><p><b>Weight:</b></p></td><td><p>${
-                      allPkmResource[indexPkm].weight
-                    }</p></td></tr>
-                    <tr><td><p><b>Base Experience:</b></p></td><td><p>${
-                      allPkmResource[indexPkm].base_experience
-                    }</p></td></tr>  
-                    <tr><td><p><b>Abilities:</b></p></td><td><p>${getTypeAbilities(
-                      allPkmResource[indexPkm]
-                    )}</p></td></tr>  
+              <div id="pkm_info_container" class="${activeCategoryId === "pkm_info_container" ? "" : "d_none"}">
+                  <table class="table infoTable">
+                    <tr><td><p>Height:</p></td><td><p>${allPkmResource[indexPkm].height}</p></td></tr>
+                    <tr><td><p>Weight:</p></td><td><p>${allPkmResource[indexPkm].weight}</p></td></tr>
+                    <tr><td><p>Base Experience:</p></td><td><p>${allPkmResource[indexPkm].base_experience}</p></td></tr>  
+                    <tr><td><p>Abilities:</p></td><td><p>${getTypeAbilities(allPkmResource[indexPkm])}</p></td></tr>  
                   </table>
               </div>
-              <div id="pkm_stats_container" class=" uppercase ${
-                activeCategoryId === "pkm_stats_container" ? "" : "d_none"
-              }">
+              <div id="pkm_stats_container" class=" uppercase ${activeCategoryId === "pkm_stats_container" ? "" : "d_none"}">
                 ${getStatsBars(allPkmResource[indexPkm])}
               </div>
-              <div id="pkm_evochain_container" class="${
-                activeCategoryId === "pkm_evochain_container" ? "" : "d_none"
-              }"></div>
+              <div id="pkm_evochain_container" class="${activeCategoryId === "pkm_evochain_container" ? "" : "d_none"}"></div>
             </div>  
           </div>`;
 }
@@ -146,9 +117,9 @@ function getEvolutionArrowTemplate() {
 
 function getImprintTemplate() {
   return `
-    <section class="legalNotice">
-      <img onclick="closeOverlay()" src="./assets/img/multiply-3-48.png" alt="close dialog">
-        <h1>Impressum</h1>
+    <section  onclick="event.stopPropagation()" class="legalNotice">
+      <p  class="clickable highlight" onclick="closeLegalOverlay()">X</p>
+        <h2>Impressum</h2>
         <p>
           Malte Rettberg<br />
           Hauptstr. 71<br />
@@ -168,8 +139,8 @@ function getImprintTemplate() {
 function getPolicyTemplate() {
   return `
   
-  <section class="privacy_policy">
-  <img onclick="closeOverlay()" src="./assets/img/multiply-3-48.png" alt="close dialog">
+  <section onclick="event.stopPropagation()" class="privacy_policy">
+  <p class="clickable highlight" onclick="closeLegalOverlay()"p>X</p>
         <h2>Datenschutz&shy;erkl&auml;rung</h2>
         <h3>1. Datenschutz auf einen Blick</h3>
         <h4>Allgemeine Hinweise</h4>

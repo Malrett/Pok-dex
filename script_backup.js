@@ -1,14 +1,12 @@
 const BASE_URL = "https://pokeapi.co/api/v2";
 const loadingSpinnerRef = document.getElementById("loading_spinner");
 const loadingBtnRef = document.getElementById("loadingBtn");
-
 let apiOffset = 0;
 let allNames = [];
 let allPkmResource = [];
 let evoChainCache = {};
 let pkmDataCache = {};
-let activeCategoryId = "pkm_info_container"; // Standard ist "Main"
-let currentSearchQuery = "";
+let activeCategoryId = "pkm_info_container"; // Standard ist "Main" let currentSearchQuery = "";
 
 function init() {
   loadData();
@@ -32,7 +30,7 @@ async function loadData(path = "") {
 
 async function fetchPokemonList() {
   const response = await fetch(`${BASE_URL}/pokemon?limit=20&offset=${apiOffset}`);
-  if (!response.ok) throw new Error(`HTTP-Fehler: ${response.status}`);
+  if (!response.ok) throw new Error(`HTTP-Fehler:         ${response.status}`);
   return response.json();
 }
 
@@ -133,9 +131,7 @@ function getTypeAbilities(pokemon) {
   if (!pokemon.abilities || pokemon.abilities.length === 0) {
     return "";
   }
-
   const abilitiesText = pokemon.abilities.map((a) => a.ability.name).join(", ");
-
   return getTypeAbilitiesTemplate(abilitiesText);
 }
 
@@ -151,13 +147,12 @@ function getStatsBars(pokemon) {
     const percentage = Math.max(1, (value / maxStatValue) * 100); // mind. 1%
     html += getStatRowTemplate(name, percentage, value);
   });
-  html += `</table>`;
+  html += html += `</table>`;
   return html;
 }
 
 function renderPkmCards(startIndex) {
   let pkmCard = document.getElementById("content");
-
   for (let indexPkm = startIndex; indexPkm < allPkmResource.length; indexPkm++) {
     const pokemon = allPkmResource[indexPkm];
     pkmCard.innerHTML += renderPkmCardsTemplate(pokemon, indexPkm);
@@ -169,24 +164,24 @@ function showOverlay(indexPkm) {
   dialogContent.innerHTML = "";
   document.getElementById("overlay").classList.remove("d_none");
   dialogContent.innerHTML += fillDialogTemplate(indexPkm);
-  document.body.classList.add("hide");
-
-  // Falls Evo-Tab aktiv war, direkt Evolution Chain laden
+  document.body.classList.add("hide"); // Falls Evo-Tab aktiv war, direkt Evolution Chain laden
   if (activeCategoryId === "pkm_evochain_container") {
     loadEvolutionChain(indexPkm);
   }
 }
 
+async function fetchJSON(url, errorMessage = "HTTP error") {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${errorMessage}: ${res.status}`);
+  return res.json();
+}
+
 async function fetchSpeciesData(pokemon) {
-  const speciesRes = await fetch(pokemon.species.url);
-  if (!speciesRes.ok) throw new Error("Error loading Species-Data");
-  return speciesRes.json();
+  return fetchJSON(pokemon.species.url, "Error loading Species-Data");
 }
 
 async function fetchEvolutionChain(speciesData) {
-  const evoChainRes = await fetch(speciesData.evolution_chain.url);
-  if (!evoChainRes.ok) throw new Error("Error loading Evolution Chain");
-  return evoChainRes.json();
+  return fetchJSON(speciesData.evolution_chain.url, "Error loading Evolution Chain");
 }
 
 function parseEvolutionNames(chain) {
@@ -204,7 +199,6 @@ function parseEvolutionNames(chain) {
 async function fetchPokemonDataByName(name) {
   const cached = getPokemonFromCache(name) || getPokemonFromResource(name);
   if (cached) return cached;
-
   const pkmData = await fetchPokemonFromAPI(name);
   pkmDataCache[name] = pkmData;
   return pkmData;
@@ -224,9 +218,7 @@ function getPokemonFromResource(name) {
 }
 
 async function fetchPokemonFromAPI(name) {
-  const res = await fetch(`${BASE_URL}/pokemon/${name}`);
-  if (!res.ok) throw new Error(`Fehler beim Laden von ${name}`);
-  return res.json();
+  return fetchJSON(`${BASE_URL}/pokemon/${name}, Fehler beim Laden von ${name}`);
 }
 
 async function buildEvolutionHTML(evoNames) {
@@ -236,7 +228,6 @@ async function buildEvolutionHTML(evoNames) {
     const pkmData = await fetchPokemonDataByName(name);
     const imageUrl = pkmData.sprites.other["official-artwork"].front_default;
     evoHTMLParts.push(getEvolutionStageTemplate(name, imageUrl));
-
     if (i < evoNames.length - 1) {
       evoHTMLParts.push(getEvolutionArrowTemplate());
     }
@@ -248,7 +239,6 @@ async function loadEvolutionChain(pokemonIndex) {
   //ist jetzt ein reiner Ablaufplan (Lesbarkeit + Wartbarkeit)
   const pokemon = allPkmResource[pokemonIndex];
   if (showEvolutionFromCache(pokemon)) return;
-
   try {
     await preloadEvolutionChain(pokemon);
     displayEvolutionHTML(pokemon.name);
@@ -345,6 +335,7 @@ function toggleLoading(show) {
 //≥ 3 Buchstaben → Filter aktiv, sucht gleichzeitig in: pokemon.name, pokemon.types[*].type.name (z. B. "fire", "water")
 // Nach „Load More“ wird sofort mit dem aktuellen Suchtext erneut gefiltert.
 // Wenn Eingabe kürzer als 3 Zeichen → alle Pokémon anzeigen
+
 function initPokemonSearch() {
   const inp = document.getElementById("pokemonSearch");
   const clear = document.getElementById("clearSearch");
@@ -365,6 +356,7 @@ function handleSearchInput(e) {
 }
 
 //steuert Ablauf zwischen Vollanzeige & Filter
+
 function applySearchFilter() {
   const results = currentSearchQuery ? filterPokemon(currentSearchQuery) : allPkmResource;
   renderPokemonList(results, !!currentSearchQuery);
@@ -427,7 +419,6 @@ function closeLegalOverlay() {
 function showImprint() {
   showLegalOverlay(getImprintTemplate);
 }
-
 function showPolicy() {
   showLegalOverlay(getPolicyTemplate, true);
 }

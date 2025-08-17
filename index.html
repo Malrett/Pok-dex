@@ -7,10 +7,7 @@
     <link rel="stylesheet" href="./styles/fonts.css" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="icons.css" />
-    <link
-      rel="shortcut icon"
-      href="https://assets.pokemon.com/static2/_ui/img/favicon.ico"
-    />
+    <link rel="shortcut icon" href="https://assets.pokemon.com/static2/_ui/img/favicon.ico" />
   </head>
   <body onload="init()">
     <header>
@@ -21,15 +18,8 @@
         </div>
         <div class="header-right">
           <div class="search-wrapper">
-            <input
-              type="text"
-              id="pokemonSearch"
-              placeholder="Pokémon suchen..."
-              autocomplete="off"
-            />
-            <span id="clearSearch" class="clear-btn" style="display: none"
-              >✖</span
-            >
+            <input type="text" id="pokemonSearch" placeholder="Pokémon suchen..." autocomplete="off" />
+            <span id="clearSearch" class="clear-btn" style="display: none">✖</span>
             <div id="searchDropdown" class="dropdown-results"></div>
           </div>
         </div>
@@ -41,21 +31,15 @@
           <span class="loader"></span>
         </div>
         <div id="content"></div>
-        <button
-          onclick="loadMoreData()"
-          id="loadingBtn"
-          class="loadPkmBtn d_none"
-        >
-          Load more Pokémons
-        </button>
-        <div id="overlay" class="overlay d_none"></div>
+        <button onclick="loadMoreData()" id="loadingBtn" class="loadPkmBtn clickable d_none">Load more Pokémons</button>
+        <div onclick="hideOverlay()" id="overlay" class="overlay d_none"></div>
       </div>
-      <div id="legal_overlay_container" class="d_none"></div>
+      <div onclick="closeLegalOverlay()" id="legal_overlay_container" class="overlay d_none"></div>
     </main>
     <footer>
       <p>© 2025 Malte Rettberg</p>
-      <p class="clickable" onclick="showPolicy()">Datenschutzerklärung</p>
-      <p class="clickable" onclick="showImprint()">Impressum</p>
+      <p class="clickable highlight" onclick="showPolicy()">Datenschutzerklärung</p>
+      <p class="clickable highlight" onclick="showImprint()">Impressum</p>
     </footer>
   </body>
   <script src="script.js"></script>
