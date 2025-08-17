@@ -16,7 +16,8 @@
     <header>
       <div class="header_wrapper">
         <div class="header-left">
-          <img src="./assets/img/pokeapi_256.png" alt="Pokémon Logo" />
+          <img src="./assets/img/pokeball.png" alt="Pokémon Logo" />
+          <h1>Pokédex</h1>
         </div>
         <div class="header-right">
           <div class="search-wrapper">
@@ -49,9 +50,12 @@
         </button>
         <div id="overlay" class="overlay d_none"></div>
       </div>
+      <div id="legal_overlay_container" class="d_none"></div>
     </main>
     <footer>
       <p>© 2025 Malte Rettberg</p>
+      <p class="clickable" onclick="showPolicy()">Datenschutzerklärung</p>
+      <p class="clickable" onclick="showImprint()">Impressum</p>
     </footer>
   </body>
   <script src="script.js"></script>

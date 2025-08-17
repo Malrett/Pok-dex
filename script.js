@@ -453,3 +453,22 @@ function toggleLoadMoreButton() {
     .getElementById("loadingBtn")
     .classList.toggle("d_none", !!currentSearchQuery);
 }
+
+function showImprint() {
+  let legalInformationRef = document.getElementById("legal_overlay_container");
+  legalInformationRef.classList.remove("d_none");
+  legalInformationRef.innerHTML = "";
+  legalInformationRef.innerHTML += getImprintTemplate();
+}
+
+function showPolicy() {
+  let legalInformationRef = document.getElementById("legal_overlay_container");
+  legalInformationRef.classList.remove("d_none");
+  legalInformationRef.innerHTML = "";
+  legalInformationRef.innerHTML += getPolicyTemplate();
+}
+
+function closeOverlay() {
+  let legalInformationRef = document.getElementById("legal_overlay_container");
+  legalInformationRef.classList.add("d_none");
+}
